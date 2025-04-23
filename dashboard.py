@@ -10,33 +10,35 @@ class Dashboard(QWidget):
 
     def init_ui(self):
         self.showFullScreen()
+
         palette = self.palette()
         palette.setColor(QPalette.Window, QColor('#22C9C1'))
         self.setPalette(palette)
 
-        main_layout = QVBoxLayout()
+        layout = QVBoxLayout()
+
         header = QLabel("Sensors")
         header.setFont(QFont("Arial", 20, QFont.Bold))
         header.setStyleSheet("color: white;")
-        subheader = QLabel("Subheading")
+        subheader = QLabel("Tryck på Go to för att se detaljer")
         subheader.setStyleSheet("color: #d0f0f0;")
-        main_layout.addWidget(header)
-        main_layout.addWidget(subheader)
+        layout.addWidget(header)
+        layout.addWidget(subheader)
 
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         container = QWidget()
         sensor_layout = QVBoxLayout()
 
-        sensor_layout.addWidget(SensorCard("Sensor 1", "Detailed overview for Sensor 1"))
-        sensor_layout.addWidget(SensorCard("Sensor 2", "Detailed overview for Sensor 2"))
-        sensor_layout.addWidget(SensorCard("Sensor 3", "Detailed overview for Sensor 3"))
+        sensor_layout.addWidget(SensorCard("Sensor 1", "Info om Sensor 1", self))
+        sensor_layout.addWidget(SensorCard("Sensor 2", "Info om Sensor 2", self))
+        sensor_layout.addWidget(SensorCard("Sensor 3", "Info om Sensor 3", self))
 
         container.setLayout(sensor_layout)
         scroll.setWidget(container)
-        main_layout.addWidget(scroll)
+        layout.addWidget(scroll)
 
-        self.setLayout(main_layout)
+        self.setLayout(layout)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

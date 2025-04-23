@@ -4,10 +4,15 @@ from PyQt5.QtCore import Qt
 from sensor_detail import SensorDetail
 
 class SensorCard(QFrame):
-    def __init__(self, title, description, image_path=None):
+    def __init__(self, title, description, dashboard, image_path=None):
         super().__init__()
+        self.dashboard = dashboard
+        self.title = title
         self.setFrameShape(QFrame.Box)
         self.setStyleSheet("background-color: white; border-radius: 8px;")
+        self.init_ui(description, image_path)
+
+    def init_ui(self, description, image_path):
         layout = QHBoxLayout()
 
         img_label = QLabel()
@@ -20,14 +25,14 @@ class SensorCard(QFrame):
         layout.addWidget(img_label)
 
         text_layout = QVBoxLayout()
-        title_label = QLabel(title)
+        title_label = QLabel(self.title)
         title_label.setFont(QFont("Arial", 14, QFont.Bold))
         desc_label = QLabel(description)
         desc_label.setStyleSheet("color: gray;")
 
         button = QPushButton("Go to")
         button.setFixedWidth(80)
-        button.clicked.connect(lambda: self.open_detail_view(title))
+        button.clicked.connect(self.open_detail_view)
 
         text_layout.addWidget(title_label)
         text_layout.addWidget(desc_label)
@@ -36,6 +41,7 @@ class SensorCard(QFrame):
 
         self.setLayout(layout)
 
-    def open_detail_view(self, sensor_name):
-        self.detail_window = SensorDetail(sensor_name)
+    def open_detail_view(self):
+        self.dashboard.hide()
+        self.detail_window = SensorDetail(self.title, self.dashboard)
         self.detail_window.show()

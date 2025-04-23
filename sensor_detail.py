@@ -3,8 +3,9 @@ from PyQt5.QtGui import QPalette, QColor, QFont
 from PyQt5.QtCore import Qt
 
 class SensorDetail(QWidget):
-    def __init__(self, sensor_name):
+    def __init__(self, sensor_name, dashboard_window):
         super().__init__()
+        self.dashboard_window = dashboard_window
         self.setWindowTitle(f"{sensor_name} - Details")
         self.showFullScreen()
 
@@ -12,25 +13,30 @@ class SensorDetail(QWidget):
         palette.setColor(QPalette.Window, QColor('#22C9C1'))
         self.setPalette(palette)
 
-        main_layout = QVBoxLayout()
+        layout = QVBoxLayout()
 
         top_bar = QHBoxLayout()
         back_btn = QPushButton("← Back")
         back_btn.setFixedSize(80, 30)
         back_btn.setStyleSheet("background-color: white; color: black; font-weight: bold;")
-        back_btn.clicked.connect(self.close)
+        back_btn.clicked.connect(self.go_back)
         top_bar.addWidget(back_btn)
         top_bar.addStretch()
-
-        main_layout.addLayout(top_bar)
+        layout.addLayout(top_bar)
 
         label = QLabel("Detaljsidan...")
         label.setFont(QFont("Arial", 18, QFont.Bold))
         label.setStyleSheet("color: white;")
         label.setAlignment(Qt.AlignCenter)
+        layout.addStretch()
+        layout.addWidget(label)
+        layout.addStretch()
 
-        main_layout.addStretch()
-        main_layout.addWidget(label)
-        main_layout.addStretch()
+        self.setLayout(layout)
 
-        self.setLayout(main_layout)
+
+    def go_back(self):
+        self.dashboard_window.setWindowState(Qt.WindowNoState)
+        self.dashboard_window.show()
+        self.dashboard_window.showFullScreen()
+        self.close()
