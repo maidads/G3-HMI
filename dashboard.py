@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QScrollArea, QWidget
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QScrollArea
 from PyQt5.QtGui import QPalette, QColor, QFont
 from sensor_card import SensorCard
 
@@ -15,7 +15,6 @@ class Dashboard(QWidget):
         self.setPalette(palette)
 
         main_layout = QVBoxLayout()
-
         header = QLabel("Sensors")
         header.setFont(QFont("Arial", 20, QFont.Bold))
         header.setStyleSheet("color: white;")
@@ -29,9 +28,9 @@ class Dashboard(QWidget):
         container = QWidget()
         sensor_layout = QVBoxLayout()
 
-        sensor_layout.addWidget(SensorCard("Sensor 1", "Press go to for a more detailed overview for the sensor"))
-        sensor_layout.addWidget(SensorCard("Sensor 2", "Press go to for a more detailed overview for the sensor"))
-        sensor_layout.addWidget(SensorCard("Sensor 3", "Press go to for a more detailed overview for the sensor"))
+        sensor_layout.addWidget(SensorCard("Sensor 1", "Detailed overview for Sensor 1"))
+        sensor_layout.addWidget(SensorCard("Sensor 2", "Detailed overview for Sensor 2"))
+        sensor_layout.addWidget(SensorCard("Sensor 3", "Detailed overview for Sensor 3"))
 
         container.setLayout(sensor_layout)
         scroll.setWidget(container)
