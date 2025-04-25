@@ -69,6 +69,19 @@ class SensorCard(QFrame):
 
         button = QPushButton("Go to")
         button.setFixedWidth(80)
+        button.setStyleSheet("""
+            QPushButton {
+                background-color: #B0E0E6;
+                color: black;
+                border: none;
+                border-radius: 6px;
+                padding: 4px;
+            }
+            QPushButton:hover {
+                background-color: #A0CCD5;
+            }
+        """)
+
         button.clicked.connect(self.open_detail_view)
 
         text_layout.addWidget(title_label)
