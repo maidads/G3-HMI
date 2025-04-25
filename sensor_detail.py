@@ -10,7 +10,7 @@ class SensorDetail(QWidget):
         self.showFullScreen()
 
         palette = self.palette()
-        palette.setColor(QPalette.Window, QColor('#22C9C1'))
+        palette.setColor(QPalette.Window, QColor('#B0E0E6'))
         self.setPalette(palette)
 
         layout = QVBoxLayout()
@@ -23,14 +23,6 @@ class SensorDetail(QWidget):
         top_bar.addWidget(back_btn)
         top_bar.addStretch()
         layout.addLayout(top_bar)
-
-        label = QLabel("Detaljsidan...")
-        label.setFont(QFont("Arial", 18, QFont.Bold))
-        label.setStyleSheet("color: white;")
-        label.setAlignment(Qt.AlignCenter)
-        layout.addStretch()
-        layout.addWidget(label)
-        layout.addStretch()
 
         self.setLayout(layout)
 
