@@ -16,9 +16,6 @@ class SensorCard(QFrame):
                 background-color: white;
                 border-radius: 12px;
             }
-            QFrame:hover {
-                background-color: #F5F5F5;
-            }
         """)
         self.init_ui(description, image_path)
 
