@@ -1,7 +1,9 @@
+# sensor_detail.py
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout
 from PyQt5.QtGui import QPalette, QColor, QFont
 from PyQt5.QtCore import Qt
 from battery_monitor import BatteryMonitor
+from water_level_chart import WaterLevelChart  # Import the new component
 
 class SensorDetail(QWidget):
     def __init__(self, sensor_name, dashboard_window):
@@ -38,7 +40,7 @@ class SensorDetail(QWidget):
         # Water level display (placeholder)
         water_widget = QWidget()
         water_layout = QVBoxLayout(water_widget)
-        water_title = QLabel("Water Level")
+        water_title = QLabel("Current Water Level")
         water_title.setFont(QFont("Arial", 12, QFont.Bold))
         water_title.setAlignment(Qt.AlignCenter)
         water_value = QLabel("75%")
@@ -57,12 +59,25 @@ class SensorDetail(QWidget):
         
         layout.addLayout(info_section)
         
-        # Add placeholder for historical data chart
-        chart_placeholder = QLabel("Water Level History Chart (Coming Soon)")
-        chart_placeholder.setStyleSheet("background-color: white; padding: 20px; border-radius: 8px;")
-        chart_placeholder.setAlignment(Qt.AlignCenter)
-        chart_placeholder.setMinimumHeight(200)
-        layout.addWidget(chart_placeholder)
+        # Add water level history chart
+        chart_label = QLabel("Water Level History (Last 7 Days)")
+        chart_label.setFont(QFont("Arial", 12, QFont.Bold))
+        chart_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(chart_label)
+        
+        # Get sensor ID from name (simple example)
+        sensor_id = None
+        if sensor_name:
+            try:
+                sensor_id = int(sensor_name.split()[-1])
+            except:
+                pass
+        
+        # Add the water level chart
+        self.water_chart = WaterLevelChart()
+        self.water_chart.update_chart(sensor_id)
+        self.water_chart.setMinimumHeight(300)
+        layout.addWidget(self.water_chart)
         
         self.setLayout(layout)
 
