@@ -1,0 +1,49 @@
+# Virtual Environment
+.venv/
+venv/
+env/
+
+# Python bytecode
+__pycache__/
+**pycache**/  # Alternative syntax
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# PyQt generated files
+*.qrc.py
+*_ui.py
+
+# IDE specific files
+.idea/
+.vscode/
+*.sublime-*
+.ruff_cache/
+
+# System specific files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Temporary files
+*.bak
+*.swp
+*.tmp
+
+# Test cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Project-specific files
+scanner.py
+G3-HMI-Project.txt
