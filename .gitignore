@@ -45,5 +45,5 @@ htmlcov/
 .ipynb_checkpoints
 
 # Project-specific files
-full_content_scanner.py
+scanner.py
 G3-HMI-Project.txt
