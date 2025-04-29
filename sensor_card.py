@@ -1,24 +1,32 @@
-from PyQt5.QtWidgets import QFrame, QLabel, QVBoxLayout, QHBoxLayout, QPushButton, QSizePolicy, QGraphicsDropShadowEffect
+# .\sensor_card.py
+from PyQt5.QtWidgets import (QFrame, QLabel, QVBoxLayout, QHBoxLayout,
+                             QPushButton, QSizePolicy, QGraphicsDropShadowEffect)
 from PyQt5.QtGui import QPixmap, QFont, QColor
 from PyQt5.QtCore import Qt
 from sensor_detail import SensorDetail
 
 class SensorCard(QFrame):
+    """
+    Displays a sensor on the dashboard with basic info and navigation button.
+    """
     def __init__(self, title, description, dashboard, image_path=None):
         super().__init__()
         self.dashboard = dashboard
         self.title = title
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+        # Set up card appearance
         self.setFrameShape(QFrame.NoFrame)
-        self.setMaximumWidth(400)
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.setFixedWidth(600)
         self.setStyleSheet("""
-            QFrame {
+            SensorCard {
                 background-color: white;
                 border-radius: 12px;
+                margin-bottom: 10px;
             }
         """)
-        self.init_ui(description, image_path)
 
+        # Add shadow effect
         shadow = QGraphicsDropShadowEffect(self)
         shadow.setBlurRadius(15)
         shadow.setXOffset(0)
@@ -26,70 +34,69 @@ class SensorCard(QFrame):
         shadow.setColor(QColor(0, 0, 0, 60))
         self.setGraphicsEffect(shadow)
 
+        self.init_ui(description, image_path)
+
     def init_ui(self, description, image_path):
-        main_layout = QHBoxLayout()
-        main_layout.setSpacing(12)
-        main_layout.setContentsMargins(0, 12, 0, 12)
+        """Creates the card content"""
+        main_layout = QHBoxLayout(self)
+        main_layout.setSpacing(15)
+        main_layout.setContentsMargins(15, 15, 15, 15)
 
+        # Image section
         img_label = QLabel()
-        img_label.setFixedSize(200, 200)
-        img_label.setContentsMargins(0, 0, 0, 0)
+        img_size = 150
+        img_label.setFixedSize(img_size, img_size)
+        img_label.setAlignment(Qt.AlignCenter)
 
+        # Use provided image or placeholder
         if image_path:
-            pixmap = QPixmap(image_path).scaled(200, 200, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            pixmap = QPixmap(image_path)
         else:
-            pixmap = QPixmap(200, 200)
+            pixmap = QPixmap(img_size, img_size)
             pixmap.fill(Qt.lightGray)
-        img_label.setPixmap(pixmap)
 
-        img_wrapper = QVBoxLayout()
-        img_wrapper.setContentsMargins(12, 12, 12, 12)
-        img_wrapper.setSpacing(0)
-        img_wrapper.setAlignment(Qt.AlignVCenter)
-        img_wrapper.addWidget(img_label)
+        img_label.setPixmap(pixmap.scaled(img_size, img_size, 
+                                         Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        main_layout.addWidget(img_label)
 
-        img_container = QFrame()
-        img_container.setLayout(img_wrapper)
-        img_container.setFixedWidth(200)
-
-        main_layout.addWidget(img_container)
-
+        # Text and button section
         text_layout = QVBoxLayout()
-        text_layout.setSpacing(12)
-        text_layout.setContentsMargins(12, 12, 12, 12)
+        text_layout.setSpacing(8)
+        text_layout.setContentsMargins(0, 0, 0, 0)
 
         title_label = QLabel(self.title)
         title_label.setFont(QFont("Arial", 14, QFont.Bold))
+        title_label.setWordWrap(True)
 
         desc_label = QLabel(description)
-        desc_label.setStyleSheet("color: gray;")
+        desc_label.setStyleSheet("color: #555;")
+        desc_label.setWordWrap(True)
 
-        button = QPushButton("Go to")
-        button.setFixedWidth(80)
-        button.setStyleSheet("""
+        # Detail button
+        detail_button = QPushButton("Go to Details")
+        detail_button.setFixedWidth(100)
+        detail_button.setStyleSheet("""
             QPushButton {
-                background-color: #B0E0E6;
-                color: black;
-                border: none;
-                border-radius: 6px;
-                padding: 4px;
+                background-color: #5DADE2;
+                color: white;
+                border: none; border-radius: 6px;
+                padding: 5px 8px;
+                font-weight: bold;
             }
-            QPushButton:hover {
-                background-color: #A0CCD5;
-            }
+            QPushButton:hover { background-color: #3498DB; }
         """)
-
-        button.clicked.connect(self.open_detail_view)
+        detail_button.clicked.connect(self.open_detail_view)
 
         text_layout.addWidget(title_label)
         text_layout.addWidget(desc_label)
-        text_layout.addWidget(button)
         text_layout.addStretch()
+        text_layout.addWidget(detail_button, alignment=Qt.AlignLeft)
 
         main_layout.addLayout(text_layout)
-        self.setLayout(main_layout)
+        main_layout.addStretch()
 
     def open_detail_view(self):
+        """Opens the detail view for this sensor"""
         self.dashboard.hide()
         self.detail_window = SensorDetail(self.title, self.dashboard)
         self.detail_window.show()

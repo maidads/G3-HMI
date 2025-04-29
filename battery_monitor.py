@@ -1,32 +1,33 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QProgressBar
+# .\battery_monitor.py
+import sys
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QProgressBar, QApplication
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 
 class BatteryMonitor(QWidget):
     """
-    Simple battery level monitor for sensors.
-    Displays a battery percentage and visual indicator.
+    Displays battery level with color-coded progress bar:
+    - Green (Good > 30%)
+    - Orange (Low <= 30%)
+    - Red (Critical <= 15%)
     """
-    
+
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.battery_level = 100
+        self.battery_level = 100  # Default to full battery
         self.init_ui()
-    
+
     def init_ui(self):
-        """Initialize the user interface components"""
+        """Sets up the battery monitor display"""
         layout = QVBoxLayout(self)
-        
-        # Title label
-        title_label = QLabel("Battery")
-        title_label.setFont(QFont("Arial", 12, QFont.Bold))
-        title_label.setAlignment(Qt.AlignCenter)
-        
-        # Battery level indicator
+        layout.setContentsMargins(5, 5, 5, 5)
+
+        # Progress bar for visual representation
         self.progress_bar = QProgressBar()
         self.progress_bar.setRange(0, 100)
         self.progress_bar.setValue(self.battery_level)
-        self.progress_bar.setTextVisible(True)
+        self.progress_bar.setTextVisible(False)
+        self.progress_bar.setFixedHeight(20)
         self.progress_bar.setStyleSheet("""
             QProgressBar {
                 border: 1px solid grey;
@@ -35,82 +36,56 @@ class BatteryMonitor(QWidget):
             }
             QProgressBar::chunk {
                 background-color: green;
-                border-radius: 5px;
+                border-radius: 4px;
+                margin: 0px;
             }
         """)
-        
-        # Battery level label
+
+        # Percentage display
         self.level_label = QLabel(f"{self.battery_level}%")
         self.level_label.setFont(QFont("Arial", 14, QFont.Bold))
         self.level_label.setAlignment(Qt.AlignCenter)
-        
-        # Add widgets to layout
-        layout.addWidget(title_label)
+
         layout.addWidget(self.progress_bar)
         layout.addWidget(self.level_label)
-        
-        self.setLayout(layout)
-    
+        self.update_bar_color()  # Set initial color
+
     def set_level(self, level):
-        """
-        Set the battery level (0-100%)
-        """
-        # Ensure level is within valid range
-        self.battery_level = max(0, min(100, level))
-        
-        # Update the UI
+        """Updates the battery level display"""
+        self.battery_level = max(0, min(100, int(level)))
         self.level_label.setText(f"{self.battery_level}%")
         self.progress_bar.setValue(self.battery_level)
-        
-        # Update progress bar color based on level
+        self.update_bar_color()
+
+    def update_bar_color(self):
+        """Changes the progress bar color based on battery level"""
         if self.battery_level <= 15:
-            # Red for critical
-            self.progress_bar.setStyleSheet("""
-                QProgressBar {
-                    border: 1px solid grey;
-                    border-radius: 5px;
-                    text-align: center;
-                }
-                QProgressBar::chunk {
-                    background-color: red;
-                    border-radius: 5px;
-                }
-            """)
+            color = "red"  # Critical
         elif self.battery_level <= 30:
-            # Orange for low
-            self.progress_bar.setStyleSheet("""
-                QProgressBar {
-                    border: 1px solid grey;
-                    border-radius: 5px;
-                    text-align: center;
-                }
-                QProgressBar::chunk {
-                    background-color: orange;
-                    border-radius: 5px;
-                }
-            """)
+            color = "orange"  # Low
         else:
-            # Green for good
-            self.progress_bar.setStyleSheet("""
-                QProgressBar {
-                    border: 1px solid grey;
-                    border-radius: 5px;
-                    text-align: center;
-                }
-                QProgressBar::chunk {
-                    background-color: green;
-                    border-radius: 5px;
-                }
-            """)
+            color = "green"  # Good
+
+        self.progress_bar.setStyleSheet(f"""
+            QProgressBar {{
+                border: 1px solid grey;
+                border-radius: 5px;
+                text-align: center;
+            }}
+            QProgressBar::chunk {{
+                background-color: {color};
+                border-radius: 4px;
+                margin: 0px;
+            }}
+        """)
 
 
-# Simple test code when run directly
+# Test code
 if __name__ == "__main__":
-    import sys
-    from PyQt5.QtWidgets import QApplication
-    
     app = QApplication(sys.argv)
-    battery = BatteryMonitor()
-    battery.set_level(75)
-    battery.show()
+    battery_widget = BatteryMonitor()
+    battery_widget.set_level(75)
+    battery_widget.setWindowTitle("Battery Monitor Test")
+    battery_widget.setGeometry(100, 100, 200, 150)
+    battery_widget.show()
     sys.exit(app.exec_())
