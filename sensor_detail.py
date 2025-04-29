@@ -11,10 +11,11 @@ class SensorDetail(QWidget):
     Detailed view of a single sensor showing current readings,
     alarm status, battery level, and historical data.
     """
-    def __init__(self, sensor_name, dashboard_window):
+    def __init__(self, sensor_name, dashboard_window, db=None):
         super().__init__()
         self.dashboard_window = dashboard_window
         self.sensor_name = sensor_name
+        self.db = db  # Store database reference
 
         self.setWindowTitle(f"{sensor_name} - Details")
         self.showFullScreen()
@@ -58,7 +59,17 @@ class SensorDetail(QWidget):
         alarm_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(alarm_label)
         
+        # Get alarm threshold settings from database
+        warning_threshold = 75 
+        critical_threshold = 85
+        if self.db:
+            settings = self.db.get_settings()
+            if settings:
+                warning_threshold = settings.get("warning_threshold", warning_threshold)
+                critical_threshold = settings.get("critical_threshold", critical_threshold)
+        
         self.alarm_system = AlarmSystem()
+        self.alarm_system.set_thresholds(warning_threshold, critical_threshold)
         main_layout.addWidget(self.alarm_system)
 
         # Current readings section (water level & battery)
@@ -74,9 +85,15 @@ class SensorDetail(QWidget):
         water_title.setFont(QFont("Arial", 12, QFont.Bold))
         water_title.setAlignment(Qt.AlignCenter)
         
-        # Placeholder value - would be replaced with actual sensor data
-        current_water_level = 65
-        self.water_value = QLabel(f"{current_water_level}%")
+        # Get actual sensor data if database is available
+        current_water_level = 65  # Default value
+        if self.db and self.sensor_name:
+            sensor_data = self.db.get_sensor_data(self.sensor_name)
+            if sensor_data and 'current_water_level' in sensor_data:
+                current_water_level = sensor_data['current_water_level']
+        
+        # Format water level to display with one decimal place
+        self.water_value = QLabel(f"{current_water_level:.1f}%")
         self.water_value.setFont(QFont("Arial", 28, QFont.Bold))
         self.water_value.setAlignment(Qt.AlignCenter)
         water_layout.addWidget(water_title)
@@ -95,7 +112,15 @@ class SensorDetail(QWidget):
         
         # Add battery monitor
         self.battery_monitor = BatteryMonitor()
-        self.battery_monitor.set_level(85)  # Placeholder level
+        
+        # Get battery level from database if available
+        battery_level = 85  # Default value
+        if self.db and self.sensor_name:
+            sensor_data = self.db.get_sensor_data(self.sensor_name)
+            if sensor_data and 'current_battery_level' in sensor_data:
+                battery_level = sensor_data['current_battery_level']
+        
+        self.battery_monitor.set_level(battery_level)
         battery_layout.addWidget(self.battery_monitor)
         
         info_section_layout.addWidget(water_container)
@@ -109,18 +134,40 @@ class SensorDetail(QWidget):
         chart_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(chart_label)
 
-        # Try to extract sensor ID for chart data
-        sensor_id_for_chart = None
-        if sensor_name:
-            parts = sensor_name.split()
-            if parts and parts[-1].isdigit():
-                try:
-                    sensor_id_for_chart = int(parts[-1])
-                except ValueError:
-                    pass
-
+        # Create the chart and update with data if available
         self.water_chart = WaterLevelChart()
-        self.water_chart.update_chart(sensor_id_for_chart)
+        # Set chart thresholds to match alarm thresholds
+        self.water_chart.warning_threshold = warning_threshold
+        self.water_chart.critical_threshold = critical_threshold
+        
+        if self.db and self.sensor_name:
+            # Get historical data for chart
+            historical_data = self.db.get_historical_data(self.sensor_name)
+            if historical_data:
+                # Use real data if available
+                self.water_chart.update_chart_with_data(historical_data)
+            else:
+                # Try to extract sensor ID for chart data
+                sensor_id_for_chart = None
+                parts = self.sensor_name.split()
+                if parts and parts[-1].isdigit():
+                    try:
+                        sensor_id_for_chart = int(parts[-1])
+                    except ValueError:
+                        pass
+                self.water_chart.update_chart(sensor_id_for_chart)
+        else:
+            # Use placeholder data with sensor ID if possible
+            sensor_id_for_chart = None
+            if self.sensor_name:
+                parts = self.sensor_name.split()
+                if parts and parts[-1].isdigit():
+                    try:
+                        sensor_id_for_chart = int(parts[-1])
+                    except ValueError:
+                        pass
+            self.water_chart.update_chart(sensor_id_for_chart)
+            
         self.water_chart.setMinimumHeight(300)
         main_layout.addWidget(self.water_chart)
 

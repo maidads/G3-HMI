@@ -6,6 +6,8 @@ from PyQt5.QtGui import QPalette, QColor, QFont
 from PyQt5.QtCore import Qt, pyqtSlot
 from sensor_card import SensorCard
 from settings_screen import SettingsScreen
+from database_connector import DatabaseConnector
+
 
 class Dashboard(QWidget):
     """
@@ -14,6 +16,8 @@ class Dashboard(QWidget):
     def __init__(self):
         super().__init__()
         self.settings_screen = None
+        # --- Database Initialization ---
+        self.db = DatabaseConnector.get_instance()
         self.init_ui()
 
     def init_ui(self):
@@ -39,11 +43,11 @@ class Dashboard(QWidget):
         settings_btn.setFixedSize(100, 30)
         settings_btn.setStyleSheet("""
             QPushButton {
-                background-color: white; 
+                background-color: white;
                 color: black;
-                border: none; 
+                border: none;
                 border-radius: 5px;
-                padding: 5px; 
+                padding: 5px;
                 font-weight: bold;
             }
             QPushButton:hover { background-color: #f0f0f0; }
@@ -61,12 +65,12 @@ class Dashboard(QWidget):
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         scroll_area.setStyleSheet("""
-            QScrollArea { 
-                border: none; 
-                background-color: transparent; 
+            QScrollArea {
+                border: none;
+                background-color: transparent;
             }
-            QWidget#scrollContainer { 
-                background-color: transparent; 
+            QWidget#scrollContainer {
+                background-color: transparent;
             }
         """)
 
@@ -80,10 +84,12 @@ class Dashboard(QWidget):
         sensor_layout.setSpacing(20)
         sensor_layout.setContentsMargins(10, 10, 10, 10)
 
-        # Add sensor cards
-        sensor_layout.addWidget(SensorCard("Sensor 1", "Monitors water level in main tank", self))
-        sensor_layout.addWidget(SensorCard("Sensor 2", "Monitors water level in reserve tank", self))
-        sensor_layout.addWidget(SensorCard("Sensor 3", "Monitors water level in overflow tank", self))
+        # Add sensor cards for each sensor in the database
+        sensor_ids = self.db.get_sensors()
+        for sensor_id in sensor_ids:
+            sensor_data = self.db.get_sensor_data(sensor_id)
+            description = f"Monitors water level in {sensor_data.get('name', 'tank')}"
+            sensor_layout.addWidget(SensorCard(sensor_id, description, self, db=self.db))
 
         scroll_area.setWidget(scroll_content_widget)
         main_layout.addWidget(scroll_area)
@@ -93,7 +99,8 @@ class Dashboard(QWidget):
     def open_settings(self):
         """Opens the settings screen"""
         if self.settings_screen is None or not self.settings_screen.isVisible():
-            self.settings_screen = SettingsScreen(parent=self)
+            # Pass the db instance to settings screen
+            self.settings_screen = SettingsScreen(parent=self, db=self.db)
             self.settings_screen.closed.connect(self.show_dashboard)
 
             self.hide()

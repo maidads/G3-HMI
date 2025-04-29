@@ -61,15 +61,27 @@ class AlarmSystem(QWidget):
         """Updates alarm state based on water level"""
         old_state = self.alarm_state
 
-        if water_level >= self.critical_threshold:
-            self.set_critical_alarm(f"CRITICAL: Water level at {water_level}%")
+        # Ensure water_level is treated as a float for comparison and formatting
+        try:
+            level = float(water_level)
+        except (ValueError, TypeError):
+             # Handle cases where water_level might not be a number
+             self.set_warning_alarm(f"Invalid level data received: {water_level}")
+             print(f"Warning: Invalid water level data for {sensor_id}: {water_level}")
+             return # Stop processing if data is invalid
+
+        if level >= self.critical_threshold:
+            # --- FORMATTING APPLIED HERE ---
+            self.set_critical_alarm(f"CRITICAL: Water level at {level:.2f}%")
             if old_state != "Critical":
-                self.alarm_triggered.emit(sensor_id, f"Critical water level: {water_level}%")
-        elif water_level >= self.warning_threshold:
-            self.set_warning_alarm(f"WARNING: Water level at {water_level}%")
+                self.alarm_triggered.emit(sensor_id, f"Critical water level: {level:.2f}%")
+        elif level >= self.warning_threshold:
+            # --- FORMATTING APPLIED HERE ---
+            self.set_warning_alarm(f"WARNING: Water level at {level:.2f}%")
             if old_state != "Warning":
-                self.alarm_triggered.emit(sensor_id, f"Warning water level: {water_level}%")
+                self.alarm_triggered.emit(sensor_id, f"Warning water level: {level:.2f}%")
         else:
+            # No need to display the level in the 'Normal' message typically
             self.clear_alarm("Water level within safe limits")
             if old_state != "Normal":
                 self.alarm_cleared.emit(sensor_id)
