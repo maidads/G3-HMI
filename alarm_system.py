@@ -1,57 +1,46 @@
-# alarm_system.py
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QFrame
-from PyQt5.QtGui import QFont, QColor
+# .\alarm_system.py
+import sys
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, 
+                             QLabel, QFrame, QMainWindow, QSlider, QCheckBox)
+from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt, pyqtSignal, QTimer
 
 class AlarmSystem(QWidget):
     """
-    Alarm component for monitoring water levels.
-    Displays status and warnings when thresholds are exceeded.
-    
-    Emits signals when alarm states change that can be connected
-    to external notification systems.
+    Displays alarm status for water levels with color-coded indicators.
+    Changes from green (Normal) to orange (Warning) to red (Critical).
     """
-    
-    # Define signals
+
+    # Signals for other components to react to alarm state changes
     alarm_triggered = pyqtSignal(str, str)  # (sensor_id, message)
-    alarm_cleared = pyqtSignal(str)  # sensor_id
-    
+    alarm_cleared = pyqtSignal(str)         # (sensor_id)
+
     def __init__(self, parent=None):
         super().__init__(parent)
-        
-        # Default thresholds (can be configured)
+        # Default thresholds (configurable)
         self.warning_threshold = 75
         self.critical_threshold = 85
+        self.alarm_state = "Normal"
         
-        # Alarm state
-        self.alarm_state = "Normal"  # "Normal", "Warning", or "Critical"
-        
-        # Initialize UI
         self.init_ui()
         
-        # Demo mode - automatically cycle states
+        # For demo/testing mode
         self.demo_mode = False
         self.demo_timer = QTimer(self)
         self.demo_timer.timeout.connect(self.cycle_demo_states)
-        
+
     def init_ui(self):
-        """Initialize the user interface"""
-        # Main layout
+        """Creates the alarm status display"""
         layout = QVBoxLayout(self)
-        
-        # Title
-        title = QLabel("Alarm Status")
-        title.setFont(QFont("Arial", 12, QFont.Bold))
-        title.setAlignment(Qt.AlignCenter)
-        layout.addWidget(title)
-        
-        # Status display
+        layout.setContentsMargins(5, 0, 5, 5)
+
+        # Status indicator with color background
         self.status_frame = QFrame()
-        self.status_frame.setFrameShape(QFrame.Box)
-        self.status_frame.setLineWidth(2)
+        self.status_frame.setFrameShape(QFrame.StyledPanel)
+        self.status_frame.setLineWidth(0)
         self.status_frame.setStyleSheet("background-color: green; border-radius: 8px;")
         self.status_frame.setMinimumHeight(40)
-        
+
         # Status text
         status_layout = QVBoxLayout(self.status_frame)
         self.status_label = QLabel("Normal")
@@ -59,28 +48,19 @@ class AlarmSystem(QWidget):
         self.status_label.setAlignment(Qt.AlignCenter)
         self.status_label.setStyleSheet("color: white;")
         status_layout.addWidget(self.status_label)
-        
-        # Message text
+
+        # Message below status indicator
         self.message_label = QLabel("Water level within safe limits")
         self.message_label.setAlignment(Qt.AlignCenter)
-        
-        # Add widgets to layout
+        self.message_label.setStyleSheet("font-size: 10pt;")
+
         layout.addWidget(self.status_frame)
         layout.addWidget(self.message_label)
-        
-        self.setLayout(layout)
-    
+
     def check_water_level(self, sensor_id, water_level):
-        """
-        Check if water level exceeds thresholds and update alarm state.
-        
-        Args:
-            sensor_id: ID of the sensor being checked
-            water_level: Current water level (percentage)
-        """
+        """Updates alarm state based on water level"""
         old_state = self.alarm_state
-        
-        # Check against thresholds
+
         if water_level >= self.critical_threshold:
             self.set_critical_alarm(f"CRITICAL: Water level at {water_level}%")
             if old_state != "Critical":
@@ -93,52 +73,44 @@ class AlarmSystem(QWidget):
             self.clear_alarm("Water level within safe limits")
             if old_state != "Normal":
                 self.alarm_cleared.emit(sensor_id)
-    
+
     def set_warning_alarm(self, message):
-        """Set alarm state to Warning"""
+        """Sets alarm to Warning state (orange)"""
         self.alarm_state = "Warning"
         self.status_frame.setStyleSheet("background-color: orange; border-radius: 8px;")
         self.status_label.setText("Warning")
         self.message_label.setText(message)
-    
+
     def set_critical_alarm(self, message):
-        """Set alarm state to Critical"""
+        """Sets alarm to Critical state (red)"""
         self.alarm_state = "Critical"
         self.status_frame.setStyleSheet("background-color: red; border-radius: 8px;")
         self.status_label.setText("Critical")
         self.message_label.setText(message)
-    
+
     def clear_alarm(self, message="Normal operation"):
-        """Clear alarm state"""
+        """Sets alarm to Normal state (green)"""
         self.alarm_state = "Normal"
         self.status_frame.setStyleSheet("background-color: green; border-radius: 8px;")
         self.status_label.setText("Normal")
         self.message_label.setText(message)
-    
+
     def set_thresholds(self, warning=75, critical=85):
-        """
-        Set warning and critical thresholds
-        
-        Args:
-            warning: Warning threshold percentage
-            critical: Critical threshold percentage
-        """
+        """Updates warning and critical thresholds"""
         self.warning_threshold = warning
         self.critical_threshold = critical
-    
+
     def enable_demo_mode(self, enabled=True):
-        """
-        Enable/disable demo mode to cycle through alarm states
-        Used for testing and demonstration
-        """
+        """Cycles through alarm states automatically for demonstration"""
         self.demo_mode = enabled
         if enabled:
-            self.demo_timer.start(3000)  # Cycle every 3 seconds
+            self.demo_timer.start(3000)  # Every 3 seconds
         else:
             self.demo_timer.stop()
-    
+            self.clear_alarm()  # Reset to normal when demo stops
+
     def cycle_demo_states(self):
-        """Cycle through alarm states for demonstration"""
+        """Rotates through the alarm states for demo mode"""
         if self.alarm_state == "Normal":
             self.set_warning_alarm("DEMO MODE: Warning state")
         elif self.alarm_state == "Warning":
@@ -147,31 +119,26 @@ class AlarmSystem(QWidget):
             self.clear_alarm("DEMO MODE: Normal state")
 
 
-# Test code when run directly
+# Test application
 if __name__ == "__main__":
-    import sys
-    from PyQt5.QtWidgets import QApplication, QMainWindow, QSlider, QHBoxLayout
-    
     app = QApplication(sys.argv)
-    
+
     window = QMainWindow()
     window.setWindowTitle("Alarm System Test")
     window.setGeometry(100, 100, 400, 300)
-    
-    # Create central widget with layout
+
     central_widget = QWidget()
     layout = QVBoxLayout(central_widget)
-    
-    # Add alarm system
+
+    # Create and add alarm system
     alarm = AlarmSystem()
     layout.addWidget(alarm)
-    
-    # Add slider to test different water levels
+
+    # Add slider for testing different levels
     slider_layout = QHBoxLayout()
     slider_label = QLabel("Water Level:")
     water_slider = QSlider(Qt.Horizontal)
-    water_slider.setMinimum(0)
-    water_slider.setMaximum(100)
+    water_slider.setRange(0, 100)
     water_slider.setValue(50)
     water_slider.setTickPosition(QSlider.TicksBelow)
     water_slider.setTickInterval(10)
@@ -179,7 +146,7 @@ if __name__ == "__main__":
     level_display = QLabel("50%")
     level_display.setMinimumWidth(40)
     
-    # Connect slider to alarm check
+    # Update alarm when slider changes
     def update_level(value):
         level_display.setText(f"{value}%")
         alarm.check_water_level("test-sensor", value)
@@ -189,15 +156,14 @@ if __name__ == "__main__":
     slider_layout.addWidget(slider_label)
     slider_layout.addWidget(water_slider)
     slider_layout.addWidget(level_display)
-    
     layout.addLayout(slider_layout)
-    
-    # Add demo mode checkbox
+
+    # Demo mode toggle
     demo_check = QCheckBox("Demo Mode")
     demo_check.stateChanged.connect(lambda state: alarm.enable_demo_mode(state == Qt.Checked))
     layout.addWidget(demo_check)
-    
+
     window.setCentralWidget(central_widget)
     window.show()
-    
+
     sys.exit(app.exec_())

@@ -1,62 +1,113 @@
+# .\dashboard.py
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QScrollArea
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QLabel,
+                             QScrollArea, QPushButton, QHBoxLayout)
 from PyQt5.QtGui import QPalette, QColor, QFont
+from PyQt5.QtCore import Qt, pyqtSlot
 from sensor_card import SensorCard
-from PyQt5.QtCore import Qt
-
+from settings_screen import SettingsScreen
 
 class Dashboard(QWidget):
+    """
+    Main screen displaying all sensors and access to settings.
+    """
     def __init__(self):
         super().__init__()
+        self.settings_screen = None
         self.init_ui()
 
     def init_ui(self):
-        self.showFullScreen()
-
+        """Sets up the dashboard UI"""
+        # Set background color
         palette = self.palette()
-        palette.setColor(QPalette.Window, QColor('#B0E0E6'))
+        palette.setColor(QPalette.Window, QColor('#B0E0E6'))  # Light blue
         self.setPalette(palette)
+        self.setAutoFillBackground(True)
 
-        layout = QVBoxLayout()
+        main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(20, 20, 20, 20)
 
-        header = QLabel("Sensors")
-        header.setFont(QFont("Arial", 22, QFont.Bold))
-        header.setStyleSheet("color: black;")
-        subheader = QLabel("Click 'Go to' to view sensor details")
-        subheader.setStyleSheet("color: black;")
-        layout.addWidget(header)
-        layout.addWidget(subheader)
+        # Header with title and settings button
+        header_layout = QHBoxLayout()
+        title = QLabel("Water Level Monitor")
+        title.setFont(QFont("Arial", 22, QFont.Bold))
+        title.setStyleSheet("color: black;")
+        header_layout.addWidget(title)
+        header_layout.addStretch()
 
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setStyleSheet("""
-            QScrollArea {
-                border: none;
-                background-color: transparent;
+        settings_btn = QPushButton("Settings")
+        settings_btn.setFixedSize(100, 30)
+        settings_btn.setStyleSheet("""
+            QPushButton {
+                background-color: white; 
+                color: black;
+                border: none; 
+                border-radius: 5px;
+                padding: 5px; 
+                font-weight: bold;
             }
-            QWidget#scrollContainer {
-                background-color: #B0E0E6;
+            QPushButton:hover { background-color: #f0f0f0; }
+        """)
+        settings_btn.clicked.connect(self.open_settings)
+        header_layout.addWidget(settings_btn)
+        main_layout.addLayout(header_layout)
+
+        # Subheader
+        subheader = QLabel("Click 'Go to Details' to view sensor information")
+        subheader.setStyleSheet("color: #333; margin-bottom: 10px;")
+        main_layout.addWidget(subheader)
+
+        # Scrollable area for sensor cards
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setStyleSheet("""
+            QScrollArea { 
+                border: none; 
+                background-color: transparent; 
+            }
+            QWidget#scrollContainer { 
+                background-color: transparent; 
             }
         """)
 
-        container = QWidget()
-        container.setObjectName("scrollContainer")
+        scroll_content_widget = QWidget()
+        scroll_content_widget.setObjectName("scrollContainer")
+        scroll_content_widget.setStyleSheet("background-color: transparent;")
 
-        sensor_layout = QVBoxLayout()
-        sensor_layout.setAlignment(Qt.AlignTop)
+        # Layout for sensor cards - center them horizontally
+        sensor_layout = QVBoxLayout(scroll_content_widget)
+        sensor_layout.setAlignment(Qt.AlignHCenter)
+        sensor_layout.setSpacing(20)
+        sensor_layout.setContentsMargins(10, 10, 10, 10)
 
-        sensor_layout.addWidget(SensorCard("Sensor 1", "Info om Sensor 1", self))
-        sensor_layout.addWidget(SensorCard("Sensor 2", "Info om Sensor 2", self))
-        sensor_layout.addWidget(SensorCard("Sensor 3", "Info om Sensor 3", self))
+        # Add sensor cards
+        sensor_layout.addWidget(SensorCard("Sensor 1", "Monitors water level in main tank", self))
+        sensor_layout.addWidget(SensorCard("Sensor 2", "Monitors water level in reserve tank", self))
+        sensor_layout.addWidget(SensorCard("Sensor 3", "Monitors water level in overflow tank", self))
 
-        container.setLayout(sensor_layout)
-        scroll.setWidget(container)
-        layout.addWidget(scroll)
+        scroll_area.setWidget(scroll_content_widget)
+        main_layout.addWidget(scroll_area)
 
-        self.setLayout(layout)
+        self.setLayout(main_layout)
+
+    def open_settings(self):
+        """Opens the settings screen"""
+        if self.settings_screen is None or not self.settings_screen.isVisible():
+            self.settings_screen = SettingsScreen(parent=self)
+            self.settings_screen.closed.connect(self.show_dashboard)
+
+            self.hide()
+            self.settings_screen.setWindowFlags(Qt.Window)
+            self.settings_screen.showFullScreen()
+
+    @pyqtSlot()
+    def show_dashboard(self):
+        """Shows the dashboard when returning from settings"""
+        self.showFullScreen()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     dashboard = Dashboard()
-    dashboard.show()
+    dashboard.showFullScreen()
     sys.exit(app.exec_())
