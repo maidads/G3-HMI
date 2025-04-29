@@ -1,4 +1,4 @@
-# .\water_level_chart.py
+# water_level_chart.py
 import sys
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QApplication, QMainWindow
 import matplotlib.pyplot as plt
@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 class WaterLevelChart(QWidget):
     """
     Displays a chart showing water level history over the past 7 days.
-    Currently uses placeholder data with variations based on sensor ID.
+    Can use real data or placeholder data depending on availability.
     """
 
     def __init__(self, parent=None):
@@ -35,7 +35,7 @@ class WaterLevelChart(QWidget):
 
     def update_chart(self, sensor_id=None):
         """
-        Updates the chart with data for the specified sensor.
+        Updates the chart with random data for the specified sensor.
         
         Args:
             sensor_id: Optional ID to generate consistent data for a specific sensor
@@ -77,6 +77,54 @@ class WaterLevelChart(QWidget):
         ax.grid(True, linestyle=':', alpha=0.6)
         ax.legend(fontsize=9)
 
+        # Improve date label readability
+        self.figure.autofmt_xdate()
+        
+        # Ensure proper layout
+        self.figure.tight_layout()
+        
+        # Update the canvas
+        self.canvas.draw()
+        
+    def update_chart_with_data(self, history_data):
+        """Update chart with actual historical data"""
+        # Clear previous plot
+        self.figure.clear()
+        
+        # Create new subplot
+        ax = self.figure.add_subplot(111)
+        
+        if not history_data:
+            # No data, show empty chart
+            ax.text(0.5, 0.5, "No data available", 
+                    horizontalalignment='center',
+                    verticalalignment='center',
+                    transform=ax.transAxes)
+            self.canvas.draw()
+            return
+            
+        # Extract dates and water levels
+        dates = [item['date'] for item in history_data]
+        water_levels = [item['water_level'] for item in history_data]
+        
+        # Plot the data
+        ax.plot(dates, water_levels, marker='o', linestyle='-',
+                color='dodgerblue', linewidth=2, label='Water Level')
+        
+        # Add threshold lines
+        ax.axhline(y=self.warning_threshold, color='orange', linestyle='--',
+                  linewidth=1.5, alpha=0.8, label=f'Warning ({self.warning_threshold}%)')
+        ax.axhline(y=self.critical_threshold, color='red', linestyle='--',
+                  linewidth=1.5, alpha=0.8, label=f'Critical ({self.critical_threshold}%)')
+        
+        # Configure chart
+        ax.set_title('Water Level - Past 7 Days', fontsize=12)
+        ax.set_xlabel('Date', fontsize=10)
+        ax.set_ylabel('Water Level (%)', fontsize=10)
+        ax.set_ylim(0, 105)
+        ax.grid(True, linestyle=':', alpha=0.6)
+        ax.legend(fontsize=9)
+        
         # Improve date label readability
         self.figure.autofmt_xdate()
         

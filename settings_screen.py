@@ -1,8 +1,7 @@
 # .\settings_screen.py
-import sys
-from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
                              QSpinBox, QComboBox, QFormLayout, QTabWidget,
-                             QCheckBox, QMessageBox)
+                             QCheckBox, QMessageBox, QFileDialog)
 from PyQt5.QtGui import QFont, QPalette, QColor
 from PyQt5.QtCore import Qt, pyqtSignal
 
@@ -14,9 +13,10 @@ class SettingsScreen(QWidget):
     # Signal when screen is closed
     closed = pyqtSignal()
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, db=None):
         super().__init__(parent)
         self.parent_window = parent
+        self.db = db  # Add database reference
         self.setWindowTitle("Settings")
         
         # Set background color
@@ -67,6 +67,22 @@ class SettingsScreen(QWidget):
         top_bar_layout.addWidget(back_btn)
         
         top_bar_layout.addStretch()
+        
+        # Export button
+        export_btn = QPushButton("Export CSV")
+        export_btn.setFixedSize(100, 30)
+        export_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #3498DB;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                font-weight: bold;
+            }
+            QPushButton:hover { background-color: #2980B9; }
+        """)
+        export_btn.clicked.connect(self.export_csv)
+        top_bar_layout.addWidget(export_btn)
         
         # Save button
         save_btn = QPushButton("Save Settings")
@@ -288,6 +304,22 @@ class SettingsScreen(QWidget):
     def load_settings(self):
         """Loads values from settings into UI fields"""
         try:
+            # If we have a database connection, load settings from it
+            if self.db:
+                db_settings = self.db.get_settings()
+                if db_settings:
+                    self.settings.update(db_settings)
+                
+                # Load sensor data from db
+                for sensor_id in self.db.get_sensors():
+                    sensor_data = self.db.get_sensor_data(sensor_id)
+                    if sensor_data and sensor_id in self.settings["sensors"]:
+                        # Extract relevant settings from sensor data
+                        for key in ["enabled", "max_level", "offset", "name"]:
+                            if key in sensor_data:
+                                self.settings["sensors"][sensor_id][key] = sensor_data[key]
+            
+            # Update UI with loaded settings
             # Alarm tab
             self.warning_spin.setValue(self.settings["warning_threshold"])
             self.critical_spin.setValue(self.settings["critical_threshold"])
@@ -298,7 +330,7 @@ class SettingsScreen(QWidget):
             self.update_spin.setValue(self.settings["update_interval"])
             self.fullscreen_check.setChecked(self.settings["fullscreen"])
 
-            # Sensor tab
+            # Sensor tab - populate with first sensor initially
             if self.sensor_combo.count() > 0:
                 self.update_sensor_ui_fields(self.sensor_combo.currentText())
         except KeyError as e:
@@ -311,9 +343,9 @@ class SettingsScreen(QWidget):
         if sensor_name in self.settings["sensors"]:
             sensor_config = self.settings["sensors"][sensor_name]
             try:
-                self.sensor_enabled.setChecked(sensor_config["enabled"])
-                self.max_level_spin.setValue(sensor_config["max_level"])
-                self.offset_spin.setValue(sensor_config["offset"])
+                self.sensor_enabled.setChecked(sensor_config.get("enabled", True))
+                self.max_level_spin.setValue(sensor_config.get("max_level", 100))
+                self.offset_spin.setValue(sensor_config.get("offset", 0))
             except KeyError as e:
                 print(f"Warning: Missing setting key for sensor '{sensor_name}': {e}")
             except Exception as e:
@@ -322,6 +354,14 @@ class SettingsScreen(QWidget):
     def save_settings(self):
         """Saves the current UI field values to settings"""
         try:
+            # Save current sensor settings first (before switching to another sensor)
+            current_sensor_name = self.sensor_combo.currentText()
+            if current_sensor_name in self.settings["sensors"]:
+                sensor_config = self.settings["sensors"][current_sensor_name]
+                sensor_config["enabled"] = self.sensor_enabled.isChecked()
+                sensor_config["max_level"] = self.max_level_spin.value()
+                sensor_config["offset"] = self.offset_spin.value()
+
             # Save alarm settings
             self.settings["warning_threshold"] = self.warning_spin.value()
             self.settings["critical_threshold"] = self.critical_spin.value()
@@ -330,21 +370,61 @@ class SettingsScreen(QWidget):
             self.settings["update_interval"] = self.update_spin.value()
             self.settings["fullscreen"] = self.fullscreen_check.isChecked()
 
-            # Save current sensor settings
-            current_sensor_name = self.sensor_combo.currentText()
-            if current_sensor_name in self.settings["sensors"]:
-                sensor_config = self.settings["sensors"][current_sensor_name]
-                sensor_config["enabled"] = self.sensor_enabled.isChecked()
-                sensor_config["max_level"] = self.max_level_spin.value()
-                sensor_config["offset"] = self.offset_spin.value()
-
-            print("Settings saved:", self.settings)
-            QMessageBox.information(self, "Settings Saved",
-                                   "Your settings have been saved.")
+            if self.db:
+                # Save global settings to database
+                global_settings = {
+                    "warning_threshold": self.settings["warning_threshold"],
+                    "critical_threshold": self.settings["critical_threshold"],
+                    "update_interval": self.settings["update_interval"]
+                }
+                
+                if not self.db.save_settings(global_settings):
+                    raise Exception("Failed to save global settings to database")
+                
+                # Save sensor settings to database
+                for sensor_id, sensor_config in self.settings["sensors"].items():
+                    sensor_settings = {
+                        "enabled": sensor_config["enabled"],
+                        "max_level": sensor_config["max_level"],
+                        "offset": sensor_config["offset"]
+                    }
+                    
+                    if not self.db.update_sensor_settings(sensor_id, sensor_settings):
+                        raise Exception(f"Failed to save settings for {sensor_id}")
+                
+                QMessageBox.information(self, "Settings Saved",
+                                       "Your settings have been saved successfully.")
+            else:
+                QMessageBox.warning(self, "Settings Updated",
+                                  "Settings updated in memory only. No database connection available.")
 
         except Exception as e:
             print(f"Error saving settings: {e}")
             QMessageBox.critical(self, "Error", f"Failed to save settings: {e}")
+
+    def export_csv(self):
+        """Export sensor data to CSV file"""
+        if not self.db:
+            QMessageBox.warning(self, "Export Error", "Database connection required for export.")
+            return
+        
+        try:
+            # Ask user for save location
+            filename, _ = QFileDialog.getSaveFileName(
+                self, "Export Data", "", "CSV Files (*.csv);;All Files (*)")
+            
+            if filename:
+                if not filename.endswith('.csv'):
+                    filename += '.csv'
+                
+                if self.db.export_to_csv(filename):
+                    QMessageBox.information(self, "Export Successful", 
+                                          f"Data exported to {filename}")
+                else:
+                    QMessageBox.critical(self, "Export Failed", 
+                                       "An error occurred during export")
+        except Exception as e:
+            QMessageBox.critical(self, "Export Error", f"Export failed: {e}")
 
     def go_back(self):
         """Closes the settings screen"""
@@ -362,11 +442,3 @@ class SettingsScreen(QWidget):
         """Handles window close event"""
         self.closed.emit()
         super().closeEvent(event)
-
-
-# Test code
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    settings = SettingsScreen()
-    settings.showFullScreen()
-    sys.exit(app.exec_())
