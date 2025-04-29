@@ -3,12 +3,14 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayo
 from PyQt5.QtGui import QPalette, QColor, QFont
 from PyQt5.QtCore import Qt
 from battery_monitor import BatteryMonitor
-from water_level_chart import WaterLevelChart  # Import the new component
+from water_level_chart import WaterLevelChart
+from alarm_system import AlarmSystem  # Import the new component
 
 class SensorDetail(QWidget):
     def __init__(self, sensor_name, dashboard_window):
         super().__init__()
         self.dashboard_window = dashboard_window
+        self.sensor_name = sensor_name
         self.setWindowTitle(f"{sensor_name} - Details")
         self.showFullScreen()
 
@@ -34,20 +36,33 @@ class SensorDetail(QWidget):
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
         
+        # Add alarm system at the top for visibility
+        alarm_label = QLabel("Alarm Status")
+        alarm_label.setFont(QFont("Arial", 12, QFont.Bold))
+        alarm_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(alarm_label)
+        
+        self.alarm_system = AlarmSystem()
+        layout.addWidget(self.alarm_system)
+        
         # Add info section with water level and battery
         info_section = QHBoxLayout()
         
-        # Water level display (placeholder)
+        # Current water level display
         water_widget = QWidget()
         water_layout = QVBoxLayout(water_widget)
         water_title = QLabel("Current Water Level")
         water_title.setFont(QFont("Arial", 12, QFont.Bold))
         water_title.setAlignment(Qt.AlignCenter)
-        water_value = QLabel("75%")
-        water_value.setFont(QFont("Arial", 24))
-        water_value.setAlignment(Qt.AlignCenter)
+        
+        # Sample water level - this would come from sensor data
+        current_water_level = 65  # Placeholder value
+        
+        self.water_value = QLabel(f"{current_water_level}%")
+        self.water_value.setFont(QFont("Arial", 24))
+        self.water_value.setAlignment(Qt.AlignCenter)
         water_layout.addWidget(water_title)
-        water_layout.addWidget(water_value)
+        water_layout.addWidget(self.water_value)
         
         # Add battery monitor component
         self.battery_monitor = BatteryMonitor()
@@ -80,6 +95,9 @@ class SensorDetail(QWidget):
         layout.addWidget(self.water_chart)
         
         self.setLayout(layout)
+        
+        # Check alarm for current water level
+        self.alarm_system.check_water_level(sensor_name, current_water_level)
 
     def go_back(self):
         self.dashboard_window.setWindowState(Qt.WindowNoState)
