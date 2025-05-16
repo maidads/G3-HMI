@@ -1,37 +1,28 @@
-# C:\1\G3-HMI\sensor_card.py
-
-# .\sensor_card.py
-from PyQt5.QtWidgets import (QFrame, QLabel, QVBoxLayout, QHBoxLayout,
-                             QPushButton, QSizePolicy, QGraphicsDropShadowEffect)
-from PyQt5.QtGui import QPixmap, QFont, QColor
+# sensor_card.py
+from PyQt5.QtWidgets import QFrame, QLabel, QVBoxLayout, QSizePolicy, QGraphicsDropShadowEffect
+from PyQt5.QtGui import QFont, QColor, QCursor
 from PyQt5.QtCore import Qt
 from sensor_detail import SensorDetail
 
 class SensorCard(QFrame):
-    """
-    Displays a sensor on the dashboard with basic info and navigation button.
-    """
-    # --- Modified __init__ signature ---
-    def __init__(self, title, description, dashboard, image_path=None, db=None):
+    def __init__(self, title, dashboard, db=None):
         super().__init__()
         self.dashboard = dashboard
         self.title = title
-        # --- Added database instance ---
         self.db = db
 
-        # Set up card appearance
         self.setFrameShape(QFrame.NoFrame)
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        self.setFixedWidth(600)
-        self.setStyleSheet("""
-            SensorCard {
-                background-color: white;
-                border-radius: 12px;
-                margin-bottom: 10px;
-            }
-        """)
+        self.setFixedSize(250, 200)
+        self.setCursor(QCursor(Qt.PointingHandCursor))
 
-        # Add shadow effect
+        # Standard bakgrund (vit), kan ändras senare
+        self.background_color = "white"
+
+        # Ladda sensorinfo och avgör bakgrund
+        self.init_ui()
+
+        # Skugga
         shadow = QGraphicsDropShadowEffect(self)
         shadow.setBlurRadius(15)
         shadow.setXOffset(0)
@@ -39,113 +30,76 @@ class SensorCard(QFrame):
         shadow.setColor(QColor(0, 0, 0, 60))
         self.setGraphicsEffect(shadow)
 
-        self.init_ui(description, image_path)
+    def init_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setSpacing(8)
+        layout.setContentsMargins(15, 15, 15, 15)
 
-    def init_ui(self, description, image_path):
-        """Creates the card content"""
-        main_layout = QHBoxLayout(self)
-        main_layout.setSpacing(15)
-        main_layout.setContentsMargins(15, 15, 15, 15)
-
-        # Image section
-        img_label = QLabel()
-        img_size = 150
-        img_label.setFixedSize(img_size, img_size)
-        img_label.setAlignment(Qt.AlignCenter)
-
-        # Use provided image or placeholder
-        if image_path:
-            pixmap = QPixmap(image_path)
-        else:
-            pixmap = QPixmap(img_size, img_size)
-            pixmap.fill(Qt.lightGray)
-
-        img_label.setPixmap(pixmap.scaled(img_size, img_size,
-                                         Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        main_layout.addWidget(img_label)
-
-        # Text and button section
-        text_layout = QVBoxLayout()
-        text_layout.setSpacing(8)
-        text_layout.setContentsMargins(0, 0, 0, 0)
-
+        # Titel
         title_label = QLabel(self.title)
         title_label.setFont(QFont("Arial", 14, QFont.Bold))
         title_label.setWordWrap(True)
+        layout.addWidget(title_label)
 
+        # Beskrivning
+        description = ""
+        if self.db:
+            sensor_data = self.db.get_sensor_data(self.title)
+            description = f"Monitors water level in {sensor_data.get('name', 'tank')}" if sensor_data else ""
         desc_label = QLabel(description)
         desc_label.setStyleSheet("color: #555;")
         desc_label.setWordWrap(True)
+        layout.addWidget(desc_label)
 
-        text_layout.addWidget(title_label)
-        text_layout.addWidget(desc_label)
+        # Status
+        status_color = None
 
-        # --- Added Real Data Display ---
         if self.db:
             sensor_data = self.db.get_sensor_data(self.title)
-            settings = self.db.get_settings() # Fetch settings once
+            settings = self.db.get_settings()
 
-            if sensor_data and settings: # Check if both sensor data and settings are available
-                water_level = sensor_data.get("current_water_level", None) # Use .get for safety
-
-                if water_level is not None: # Check if water level exists
-                    status_text = "Normal"
-                    status_color = "green"
-
-                    # Check if water level exceeds thresholds
-                    critical_threshold = settings.get("critical_threshold", 100.0) # Default if missing
-                    warning_threshold = settings.get("warning_threshold", 80.0) # Default if missing
+            if sensor_data and settings:
+                water_level = sensor_data.get("current_water_level", None)
+                if water_level is not None:
+                    critical_threshold = settings.get("critical_threshold", 100.0)
+                    warning_threshold = settings.get("warning_threshold", 80.0)
 
                     if water_level >= critical_threshold:
                         status_text = "Critical"
                         status_color = "red"
+                        self.background_color = "#F8D7DA"  # ljusröd
                     elif water_level >= warning_threshold:
                         status_text = "Warning"
                         status_color = "orange"
+                        self.background_color = "#FFF3CD"  # ljusorange
+                    else:
+                        status_text = "Normal"
+                        status_color = "green"
+                        self.background_color = "white"
 
+                    # Status-rad
                     status_label = QLabel(f"Status: {status_text}")
                     status_label.setStyleSheet(f"color: {status_color}; font-weight: bold;")
-                    text_layout.addWidget(status_label)
+                    layout.addWidget(status_label)
 
+                    # Vattennivå
                     level_label = QLabel(f"Water Level: {water_level:.1f}%")
-                    text_layout.addWidget(level_label)
-                else:
-                    # Handle case where water level data is missing for the sensor
-                    no_level_label = QLabel("Water Level: N/A")
-                    no_level_label.setStyleSheet("color: gray; font-style: italic;")
-                    text_layout.addWidget(no_level_label)
-            else:
-                 # Handle case where sensor data or settings couldn't be fetched
-                no_data_label = QLabel("Status: Data Unavailable")
-                no_data_label.setStyleSheet("color: gray; font-style: italic;")
-                text_layout.addWidget(no_data_label)
-        # --- End Real Data Display ---
+                    layout.addWidget(level_label)
 
-
-        # Detail button
-        detail_button = QPushButton("Go to Details")
-        detail_button.setFixedWidth(100)
-        detail_button.setStyleSheet("""
-            QPushButton {
-                background-color: #5DADE2;
-                color: white;
-                border: none; border-radius: 6px;
-                padding: 5px 8px;
-                font-weight: bold;
-            }
-            QPushButton:hover { background-color: #3498DB; }
+        # Ställ in slutgiltig bakgrund
+        self.setStyleSheet(f"""
+            QFrame {{
+                background-color: {self.background_color};
+                border-radius: 12px;
+            }}
+            QFrame:hover {{
+                background-color: #e0f7fa;
+            }}
         """)
-        detail_button.clicked.connect(self.open_detail_view)
 
-        text_layout.addStretch()
-        text_layout.addWidget(detail_button, alignment=Qt.AlignLeft)
+        layout.addStretch()
 
-        main_layout.addLayout(text_layout)
-        main_layout.addStretch()
-
-    def open_detail_view(self):
-        """Opens the detail view for this sensor"""
+    def mousePressEvent(self, event):
         self.dashboard.hide()
-        # --- Pass Database to SensorDetail ---
         self.detail_window = SensorDetail(self.title, self.dashboard, self.db)
         self.detail_window.show()
