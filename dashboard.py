@@ -1,7 +1,9 @@
-# .\dashboard.py
+# dashboard.py
 import sys
-from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QLabel,
-                             QScrollArea, QPushButton, QHBoxLayout)
+from PyQt5.QtWidgets import (
+    QApplication, QWidget, QVBoxLayout, QLabel,
+    QScrollArea, QPushButton, QHBoxLayout, QGridLayout
+)
 from PyQt5.QtGui import QPalette, QColor, QFont
 from PyQt5.QtCore import Qt, pyqtSlot
 from sensor_card import SensorCard
@@ -16,22 +18,20 @@ class Dashboard(QWidget):
     def __init__(self):
         super().__init__()
         self.settings_screen = None
-        # --- Database Initialization ---
         self.db = DatabaseConnector.get_instance()
         self.init_ui()
 
     def init_ui(self):
-        """Sets up the dashboard UI"""
-        # Set background color
+        # Set background
         palette = self.palette()
-        palette.setColor(QPalette.Window, QColor('#B0E0E6'))  # Light blue
+        palette.setColor(QPalette.Window, QColor('#B0E0E6'))
         self.setPalette(palette)
         self.setAutoFillBackground(True)
 
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(20, 20, 20, 20)
 
-        # Header with title and settings button
+        # Header
         header_layout = QHBoxLayout()
         title = QLabel("Water Level Monitor")
         title.setFont(QFont("Arial", 22, QFont.Bold))
@@ -57,11 +57,11 @@ class Dashboard(QWidget):
         main_layout.addLayout(header_layout)
 
         # Subheader
-        subheader = QLabel("Click 'Go to Details' to view sensor information")
+        subheader = QLabel("Click a sensor card to view details")
         subheader.setStyleSheet("color: #333; margin-bottom: 10px;")
         main_layout.addWidget(subheader)
 
-        # Scrollable area for sensor cards
+        # Scroll area
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         scroll_area.setStyleSheet("""
@@ -76,20 +76,41 @@ class Dashboard(QWidget):
 
         scroll_content_widget = QWidget()
         scroll_content_widget.setObjectName("scrollContainer")
-        scroll_content_widget.setStyleSheet("background-color: transparent;")
 
-        # Layout for sensor cards - center them horizontally
-        sensor_layout = QVBoxLayout(scroll_content_widget)
-        sensor_layout.setAlignment(Qt.AlignHCenter)
-        sensor_layout.setSpacing(20)
-        sensor_layout.setContentsMargins(10, 10, 10, 10)
+        # Grid: 3 rows x 4 columns
+        grid_layout = QGridLayout(scroll_content_widget)
+        grid_layout.setSpacing(20)
+        grid_layout.setContentsMargins(10, 10, 10, 10)
 
-        # Add sensor cards for each sensor in the database
         sensor_ids = self.db.get_sensors()
-        for sensor_id in sensor_ids:
-            sensor_data = self.db.get_sensor_data(sensor_id)
-            description = f"Monitors water level in {sensor_data.get('name', 'tank')}"
-            sensor_layout.addWidget(SensorCard(sensor_id, description, self, db=self.db))
+        total_cards = 12
+        sensors_to_display = sensor_ids[:total_cards]  # max 12
+
+        # Fyll ut med dummy-ID:n om färre än 12
+        while len(sensors_to_display) < total_cards:
+            sensors_to_display.append(None)
+
+        for i in range(total_cards):
+            row = i // 4
+            col = i % 4
+            sensor_id = sensors_to_display[i]
+
+            if sensor_id:
+                card = SensorCard(sensor_id, self, db=self.db)
+            else:
+                # Tom plats (visas som "Empty" ruta eller lämnas tom)
+                from PyQt5.QtWidgets import QFrame
+                card = QFrame()
+                card.setFixedSize(250, 200)
+                card.setStyleSheet("""
+                    QFrame {
+                        background-color: #e0e0e0;
+                        border-radius: 12px;
+                        border: 1px dashed #bbb;
+                    }
+                """)
+
+            grid_layout.addWidget(card, row, col)
 
         scroll_area.setWidget(scroll_content_widget)
         main_layout.addWidget(scroll_area)
@@ -97,19 +118,15 @@ class Dashboard(QWidget):
         self.setLayout(main_layout)
 
     def open_settings(self):
-        """Opens the settings screen"""
         if self.settings_screen is None or not self.settings_screen.isVisible():
-            # Pass the db instance to settings screen
             self.settings_screen = SettingsScreen(parent=self, db=self.db)
             self.settings_screen.closed.connect(self.show_dashboard)
-
             self.hide()
             self.settings_screen.setWindowFlags(Qt.Window)
             self.settings_screen.showFullScreen()
 
     @pyqtSlot()
     def show_dashboard(self):
-        """Shows the dashboard when returning from settings"""
         self.showFullScreen()
 
 
