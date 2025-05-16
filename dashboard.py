@@ -98,7 +98,6 @@ class Dashboard(QWidget):
             if sensor_id:
                 card = SensorCard(sensor_id, self, db=self.db)
             else:
-                # Tom plats (visas som "Empty" ruta eller lämnas tom)
                 from PyQt5.QtWidgets import QFrame
                 card = QFrame()
                 card.setFixedSize(250, 200)
