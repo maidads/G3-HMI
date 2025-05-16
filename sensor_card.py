@@ -5,10 +5,6 @@ from PyQt5.QtCore import Qt
 from sensor_detail import SensorDetail
 
 class SensorCard(QFrame):
-    """
-    Displays a sensor card with water level info and status.
-    Whole card is clickable to open the detail view.
-    """
     def __init__(self, title, dashboard, db=None):
         super().__init__()
         self.dashboard = dashboard
@@ -20,17 +16,13 @@ class SensorCard(QFrame):
         self.setFixedSize(250, 200)
         self.setCursor(QCursor(Qt.PointingHandCursor))
 
-        self.setStyleSheet("""
-            QFrame {
-                background-color: white;
-                border-radius: 12px;
-            }
-            QFrame:hover {
-                background-color: #f0f8ff;
-            }
-        """)
+        # Standard bakgrund (vit), kan ändras senare
+        self.background_color = "white"
 
-        # Add shadow
+        # Ladda sensorinfo och avgör bakgrund
+        self.init_ui()
+
+        # Skugga
         shadow = QGraphicsDropShadowEffect(self)
         shadow.setBlurRadius(15)
         shadow.setXOffset(0)
@@ -38,20 +30,18 @@ class SensorCard(QFrame):
         shadow.setColor(QColor(0, 0, 0, 60))
         self.setGraphicsEffect(shadow)
 
-        self.init_ui()
-
     def init_ui(self):
         layout = QVBoxLayout(self)
         layout.setSpacing(8)
         layout.setContentsMargins(15, 15, 15, 15)
 
-        # Sensor title
+        # Titel
         title_label = QLabel(self.title)
         title_label.setFont(QFont("Arial", 14, QFont.Bold))
         title_label.setWordWrap(True)
         layout.addWidget(title_label)
 
-        # Description
+        # Beskrivning
         description = ""
         if self.db:
             sensor_data = self.db.get_sensor_data(self.title)
@@ -61,7 +51,9 @@ class SensorCard(QFrame):
         desc_label.setWordWrap(True)
         layout.addWidget(desc_label)
 
-        # Status and water level
+        # Status
+        status_color = None
+
         if self.db:
             sensor_data = self.db.get_sensor_data(self.title)
             settings = self.db.get_settings()
@@ -69,35 +61,45 @@ class SensorCard(QFrame):
             if sensor_data and settings:
                 water_level = sensor_data.get("current_water_level", None)
                 if water_level is not None:
-                    status_text = "Normal"
-                    status_color = "green"
                     critical_threshold = settings.get("critical_threshold", 100.0)
                     warning_threshold = settings.get("warning_threshold", 80.0)
 
                     if water_level >= critical_threshold:
                         status_text = "Critical"
                         status_color = "red"
+                        self.background_color = "#F8D7DA"  # ljusröd
                     elif water_level >= warning_threshold:
                         status_text = "Warning"
                         status_color = "orange"
+                        self.background_color = "#FFF3CD"  # ljusorange
+                    else:
+                        status_text = "Normal"
+                        status_color = "green"
+                        self.background_color = "white"
 
+                    # Status-rad
                     status_label = QLabel(f"Status: {status_text}")
                     status_label.setStyleSheet(f"color: {status_color}; font-weight: bold;")
                     layout.addWidget(status_label)
 
+                    # Vattennivå
                     level_label = QLabel(f"Water Level: {water_level:.1f}%")
                     layout.addWidget(level_label)
-                else:
-                    layout.addWidget(QLabel("Water Level: N/A"))
-            else:
-                no_data = QLabel("Status: Data Unavailable")
-                no_data.setStyleSheet("color: gray; font-style: italic;")
-                layout.addWidget(no_data)
+
+        # Ställ in slutgiltig bakgrund
+        self.setStyleSheet(f"""
+            QFrame {{
+                background-color: {self.background_color};
+                border-radius: 12px;
+            }}
+            QFrame:hover {{
+                background-color: #e0f7fa;
+            }}
+        """)
 
         layout.addStretch()
 
     def mousePressEvent(self, event):
-        """Open detail view on click"""
         self.dashboard.hide()
         self.detail_window = SensorDetail(self.title, self.dashboard, self.db)
         self.detail_window.show()
