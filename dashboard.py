@@ -9,6 +9,8 @@ from PyQt5.QtCore import Qt, pyqtSlot
 from sensor_card import SensorCard
 from settings_screen import SettingsScreen
 from database_connector import DatabaseConnector
+from PyQt5.QtGui import QFont, QCursor
+
 
 
 class Dashboard(QWidget):
@@ -108,24 +110,37 @@ class Dashboard(QWidget):
         self.setLayout(main_layout)
 
     def create_empty_slot(self):
-        """Create a visual placeholder for an empty sensor slot"""
+        """Create a clickable slot to add a new sensor"""
         frame = QFrame()
         frame.setFixedSize(250, 200)
+        frame.setCursor(QCursor(Qt.PointingHandCursor))
         frame.setStyleSheet("""
             QFrame {
                 background-color: #eeeeee;
                 border-radius: 12px;
                 border: 1px dashed #bbb;
             }
+            QFrame:hover {
+                background-color: #e0f7fa;
+            }
         """)
-        label = QLabel("Slot empty", frame)
+
+        label = QLabel("➕ Add Sensor", frame)
         label.setFont(QFont("Arial", 12, QFont.StyleItalic))
         label.setAlignment(Qt.AlignCenter)
         label.setStyleSheet("color: #666;")
+
         layout = QVBoxLayout(frame)
         layout.addStretch()
         layout.addWidget(label)
         layout.addStretch()
+
+        # Gör hela rutan klickbar
+        def open_add_sensor():
+            self.open_settings()  # eller visa separat dialog
+
+        frame.mousePressEvent = lambda event: open_add_sensor()
+
         return frame
 
     def open_settings(self):
