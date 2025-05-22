@@ -26,7 +26,7 @@ class Dashboard(QWidget):
     def init_ui(self):
         # Set background
         palette = self.palette()
-        palette.setColor(QPalette.Window, QColor('#B0E0E6'))
+        palette.setColor(QPalette.Window, QColor('#00486F'))
         self.setPalette(palette)
         self.setAutoFillBackground(True)
 
