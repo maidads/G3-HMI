@@ -75,7 +75,7 @@ class SensorCard(QFrame):
                     else:
                         status_text = "Normal"
                         status_color = "green"
-                        self.background_color = "white"
+                        self.background_color = "#A8D3EF"
 
                     # Status-rad
                     status_label = QLabel(f"Status: {status_text}")

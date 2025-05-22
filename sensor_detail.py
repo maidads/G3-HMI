@@ -22,9 +22,10 @@ class SensorDetail(QWidget):
 
         # Set background color
         palette = self.palette()
-        palette.setColor(QPalette.Window, QColor('#B0E0E6'))
+        palette.setColor(QPalette.Window, QColor('#00486F'))
         self.setPalette(palette)
         self.setAutoFillBackground(True)
+        self.setStyleSheet("QLabel { color: white; }")
 
         main_layout = QVBoxLayout(self)
         main_layout.setSpacing(15)
@@ -36,7 +37,7 @@ class SensorDetail(QWidget):
         back_btn.setFixedSize(80, 30)
         back_btn.setStyleSheet("""
             QPushButton {
-                background-color: white; color: black;
+                background-color: #A8D3EF; color: black;
                 border: 1px solid #ccc; border-radius: 5px;
                 font-weight: bold;
             }

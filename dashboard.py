@@ -26,7 +26,7 @@ class Dashboard(QWidget):
     def init_ui(self):
         # Set background
         palette = self.palette()
-        palette.setColor(QPalette.Window, QColor('#B0E0E6'))
+        palette.setColor(QPalette.Window, QColor('#00486F'))
         self.setPalette(palette)
         self.setAutoFillBackground(True)
 
@@ -37,7 +37,7 @@ class Dashboard(QWidget):
         header_layout = QHBoxLayout()
         title = QLabel("Water Level Monitor")
         title.setFont(QFont("Arial", 22, QFont.Bold))
-        title.setStyleSheet("color: black;")
+        title.setStyleSheet("color: white;")
         header_layout.addWidget(title)
         header_layout.addStretch()
 
@@ -45,7 +45,7 @@ class Dashboard(QWidget):
         settings_btn.setFixedSize(100, 30)
         settings_btn.setStyleSheet("""
             QPushButton {
-                background-color: white;
+                background-color: #A8D3EF;
                 color: black;
                 border: none;
                 border-radius: 5px;
@@ -59,8 +59,8 @@ class Dashboard(QWidget):
         main_layout.addLayout(header_layout)
 
         # Subheader
-        subheader = QLabel("Click a sensor card to view details")
-        subheader.setStyleSheet("color: #333; margin-bottom: 10px;")
+        subheader = QLabel("Click a sensor card to view details.")
+        subheader.setStyleSheet("color: white; margin-bottom: 10px;")
         main_layout.addWidget(subheader)
 
         # Scroll area
