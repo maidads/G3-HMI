@@ -45,7 +45,7 @@ class Dashboard(QWidget):
         settings_btn.setFixedSize(100, 30)
         settings_btn.setStyleSheet("""
             QPushButton {
-                background-color: white;
+                background-color: #A8D3EF;
                 color: black;
                 border: none;
                 border-radius: 5px;
