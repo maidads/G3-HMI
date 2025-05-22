@@ -59,8 +59,8 @@ class Dashboard(QWidget):
         main_layout.addLayout(header_layout)
 
         # Subheader
-        subheader = QLabel("Click a sensor card to view details")
-        subheader.setStyleSheet("color: #333; margin-bottom: 10px;")
+        subheader = QLabel("Click a sensor card to view details.")
+        subheader.setStyleSheet("color: white; margin-bottom: 10px;")
         main_layout.addWidget(subheader)
 
         # Scroll area
