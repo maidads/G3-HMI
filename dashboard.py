@@ -37,7 +37,7 @@ class Dashboard(QWidget):
         header_layout = QHBoxLayout()
         title = QLabel("Water Level Monitor")
         title.setFont(QFont("Arial", 22, QFont.Bold))
-        title.setStyleSheet("color: black;")
+        title.setStyleSheet("color: white;")
         header_layout.addWidget(title)
         header_layout.addStretch()
 
