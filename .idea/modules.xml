@@ -2,7 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+<<<<<<< HEAD
       <module fileurl="file://$PROJECT_DIR$/.idea/G3-HMI.iml" filepath="$PROJECT_DIR$/.idea/G3-HMI.iml" />
+=======
+      <module fileurl="file://$PROJECT_DIR$/.idea/battery_monitor.iml" filepath="$PROJECT_DIR$/.idea/battery_monitor.iml" />
+>>>>>>> origin/BatteryMonitor
     </modules>
   </component>
 </project>
