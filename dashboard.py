@@ -42,7 +42,7 @@ class Dashboard(QWidget):
         header_layout.addStretch()
 
         settings_btn = QPushButton("Settings")
-        settings_btn.setFixedSize(100, 30)
+        settings_btn.setFixedSize(140, 40)
         settings_btn.setStyleSheet("""
             QPushButton {
                 background-color: #A8D3EF;
@@ -50,6 +50,7 @@ class Dashboard(QWidget):
                 border: none;
                 border-radius: 5px;
                 padding: 5px;
+                font-size: 16px;
                 font-weight: bold;
             }
             QPushButton:hover { background-color: #f0f0f0; }
@@ -60,6 +61,7 @@ class Dashboard(QWidget):
 
         # Subheader
         subheader = QLabel("Click a sensor card to view details.")
+        subheader.setFont(QFont("Arial", 16))
         subheader.setStyleSheet("color: white; margin-bottom: 10px;")
         main_layout.addWidget(subheader)
 
