@@ -153,7 +153,7 @@ class SettingsScreen(QWidget):
 
         # Section title
         section_title = QLabel("Alarm Thresholds (%)")
-        section_title.setFont(QFont("Arial", 11, QFont.Bold))
+        section_title.setFont(QFont("Arial", 20, QFont.Bold))
         layout.addWidget(section_title)
 
         # Form for thresholds
@@ -165,18 +165,20 @@ class SettingsScreen(QWidget):
 
         # Warning level
         warning_label = QLabel("Warning Level:")
+        warning_label.setFont(QFont("Arial", 20))
         self.warning_spin = QSpinBox()
         self.warning_spin.setRange(10, 95)
         self.warning_spin.setSuffix("%")
-        self.warning_spin.setFixedWidth(100)
+        self.warning_spin.setFixedWidth(140)
         form_layout.addRow(warning_label, self.warning_spin)
 
         # Critical level
         critical_label = QLabel("Critical Level:")
+        critical_label.setFont(QFont("Arial",20))
         self.critical_spin = QSpinBox()
         self.critical_spin.setRange(20, 99)
         self.critical_spin.setSuffix("%")
-        self.critical_spin.setFixedWidth(100)
+        self.critical_spin.setFixedWidth(140)
         form_layout.addRow(critical_label, self.critical_spin)
 
         # Link the spin boxes: critical must be > warning
