@@ -104,7 +104,8 @@ class SettingsScreen(QWidget):
 
         # Title
         title = QLabel("System Settings")
-        title.setFont(QFont("Arial", 18, QFont.Bold))
+        title.setFont(QFont("Arial", 22, QFont.Bold))
+        title.setStyleSheet("color: white;")
         title.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(title)
 
