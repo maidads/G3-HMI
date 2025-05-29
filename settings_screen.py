@@ -4,6 +4,8 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushBut
                              QCheckBox, QMessageBox, QFileDialog)
 from PyQt5.QtGui import QFont, QPalette, QColor
 from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtWidgets import QGraphicsDropShadowEffect
+
 
 class SettingsScreen(QWidget):
     """
@@ -295,21 +297,30 @@ class SettingsScreen(QWidget):
         sensor_form.addRow(offset_label, self.offset_spin)
 
         layout.addLayout(sensor_form)
-        
-        # Calibration button
+
         calibrate_btn = QPushButton("Calibrate Sensor")
         calibrate_btn.setFont(QFont("Arial",20))
-        calibrate_btn.setFixedWidth(180)
+        calibrate_btn.setFixedWidth(160)
         calibrate_btn.setStyleSheet("""
             QPushButton {
                 background-color: #A8D3EF;
                 color: black;
                 border: 1px solid #cccccc;
                 border-radius: 5px;
-                padding: 5px;
+                font-size: 16px;
+                padding: 8px;
             }
             QPushButton:hover { background-color: #f0f0f0; }
         """)
+
+        # Lägg till skuggeffekt
+        shadow = QGraphicsDropShadowEffect()
+        shadow.setBlurRadius(10)
+        shadow.setXOffset(2)
+        shadow.setYOffset(2)
+        shadow.setColor(QColor(63, 63, 63, 180))  # Mjuk mörkgrå skugga
+        calibrate_btn.setGraphicsEffect(shadow)
+
         calibrate_btn.clicked.connect(self.calibrate_sensor)
         layout.addWidget(calibrate_btn)
         
