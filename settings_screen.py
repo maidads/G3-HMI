@@ -4,6 +4,8 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushBut
                              QCheckBox, QMessageBox, QFileDialog)
 from PyQt5.QtGui import QFont, QPalette, QColor
 from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtWidgets import QGraphicsDropShadowEffect
+
 
 class SettingsScreen(QWidget):
     """
@@ -104,7 +106,8 @@ class SettingsScreen(QWidget):
 
         # Title
         title = QLabel("System Settings")
-        title.setFont(QFont("Arial", 18, QFont.Bold))
+        title.setFont(QFont("Arial", 22, QFont.Bold))
+        title.setStyleSheet("color: white;")
         title.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(title)
 
@@ -152,7 +155,7 @@ class SettingsScreen(QWidget):
 
         # Section title
         section_title = QLabel("Alarm Thresholds (%)")
-        section_title.setFont(QFont("Arial", 11, QFont.Bold))
+        section_title.setFont(QFont("Arial", 22, QFont.Bold))
         layout.addWidget(section_title)
 
         # Form for thresholds
@@ -164,18 +167,20 @@ class SettingsScreen(QWidget):
 
         # Warning level
         warning_label = QLabel("Warning Level:")
+        warning_label.setFont(QFont("Arial", 20))
         self.warning_spin = QSpinBox()
         self.warning_spin.setRange(10, 95)
         self.warning_spin.setSuffix("%")
-        self.warning_spin.setFixedWidth(100)
+        self.warning_spin.setFixedWidth(140)
         form_layout.addRow(warning_label, self.warning_spin)
 
         # Critical level
         critical_label = QLabel("Critical Level:")
+        critical_label.setFont(QFont("Arial",20))
         self.critical_spin = QSpinBox()
         self.critical_spin.setRange(20, 99)
         self.critical_spin.setSuffix("%")
-        self.critical_spin.setFixedWidth(100)
+        self.critical_spin.setFixedWidth(140)
         form_layout.addRow(critical_label, self.critical_spin)
 
         # Link the spin boxes: critical must be > warning
@@ -198,7 +203,7 @@ class SettingsScreen(QWidget):
 
         # Update settings section
         update_title = QLabel("Update Settings")
-        update_title.setFont(QFont("Arial", 11, QFont.Bold))
+        update_title.setFont(QFont("Arial", 22, QFont.Bold))
         layout.addWidget(update_title)
 
         update_form = QFormLayout()
@@ -208,6 +213,8 @@ class SettingsScreen(QWidget):
         update_form.setHorizontalSpacing(20)
 
         interval_label = QLabel("Data Update Interval:")
+        interval_label.setFont(QFont("Arial",20))
+
         self.update_spin = QSpinBox()
         self.update_spin.setRange(1, 120)
         self.update_spin.setSuffix(" min")
@@ -218,10 +225,12 @@ class SettingsScreen(QWidget):
         
         # Display settings section
         display_title = QLabel("Display Settings")
-        display_title.setFont(QFont("Arial", 11, QFont.Bold))
+        display_title.setFont(QFont("Arial", 22, QFont.Bold))
         layout.addWidget(display_title)
         
         self.fullscreen_check = QCheckBox("Start in fullscreen mode")
+        self.fullscreen_check.setFont(QFont("Arial",20))
+
         layout.addWidget(self.fullscreen_check)
         
         layout.addStretch()
@@ -238,6 +247,8 @@ class SettingsScreen(QWidget):
         # Sensor selection
         sensor_layout = QHBoxLayout()
         config_label = QLabel("Configure Sensor:")
+        config_label.setFont(QFont("Arial",20))
+
         self.sensor_combo = QComboBox()
         self.sensor_combo.setFixedWidth(150)
         self.sensor_combo.addItems(list(self.settings["sensors"].keys()))
@@ -249,11 +260,13 @@ class SettingsScreen(QWidget):
 
         # Sensor parameters section
         params_title = QLabel("Sensor Parameters")
-        params_title.setFont(QFont("Arial", 11, QFont.Bold))
+        params_title.setFont(QFont("Arial", 22, QFont.Bold))
         layout.addWidget(params_title)
 
         # Enable checkbox
         self.sensor_enabled = QCheckBox("Enable this sensor")
+        self.sensor_enabled.setFont(QFont("Arial",20))
+
         layout.addWidget(self.sensor_enabled)
 
         # Form for sensor settings
@@ -265,6 +278,8 @@ class SettingsScreen(QWidget):
 
         # Max level
         max_level_label = QLabel("Max Physical Level:")
+        max_level_label.setFont(QFont("Arial",20))
+
         self.max_level_spin = QSpinBox()
         self.max_level_spin.setRange(10, 1000)
         self.max_level_spin.setSuffix(" cm")
@@ -273,6 +288,8 @@ class SettingsScreen(QWidget):
 
         # Offset
         offset_label = QLabel("Reading Offset:")
+        offset_label.setFont(QFont("Arial",20))
+
         self.offset_spin = QSpinBox()
         self.offset_spin.setRange(-100, 100)
         self.offset_spin.setSuffix(" cm")
@@ -280,20 +297,30 @@ class SettingsScreen(QWidget):
         sensor_form.addRow(offset_label, self.offset_spin)
 
         layout.addLayout(sensor_form)
-        
-        # Calibration button
+
         calibrate_btn = QPushButton("Calibrate Sensor")
-        calibrate_btn.setFixedWidth(120)
+        calibrate_btn.setFont(QFont("Arial",20))
+        calibrate_btn.setFixedWidth(160)
         calibrate_btn.setStyleSheet("""
             QPushButton {
-                background-color: white;
+                background-color: #A8D3EF;
                 color: black;
                 border: 1px solid #cccccc;
                 border-radius: 5px;
-                padding: 5px;
+                font-size: 16px;
+                padding: 8px;
             }
             QPushButton:hover { background-color: #f0f0f0; }
         """)
+
+        # Lägg till skuggeffekt
+        shadow = QGraphicsDropShadowEffect()
+        shadow.setBlurRadius(10)
+        shadow.setXOffset(2)
+        shadow.setYOffset(2)
+        shadow.setColor(QColor(63, 63, 63, 180))  # Mjuk mörkgrå skugga
+        calibrate_btn.setGraphicsEffect(shadow)
+
         calibrate_btn.clicked.connect(self.calibrate_sensor)
         layout.addWidget(calibrate_btn)
         
