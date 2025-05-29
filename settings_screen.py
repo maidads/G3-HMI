@@ -54,16 +54,20 @@ class SettingsScreen(QWidget):
         
         # Back button
         back_btn = QPushButton("← Back")
-        back_btn.setFixedSize(80, 30)
+        back_btn.setFixedSize(100, 40)
         back_btn.setStyleSheet("""
             QPushButton {
-                background-color: white;
+                background-color: #A8D3EF;
                 color: black;
-                border: none;
-                border-radius: 5px;
+                border: 1px solid #888888;
+                border-radius: 6px;
                 font-weight: bold;
+                font-size: 16px;
+                padding: 8px 16px;
             }
-            QPushButton:hover { background-color: #f0f0f0; }
+            QPushButton:hover {
+                background-color: #90CBE8;
+            }
         """)
         back_btn.clicked.connect(self.go_back)
         top_bar_layout.addWidget(back_btn)
@@ -72,33 +76,43 @@ class SettingsScreen(QWidget):
         
         # Export button
         export_btn = QPushButton("Export CSV")
-        export_btn.setFixedSize(100, 30)
+        export_btn.setFixedSize(140, 40)
         export_btn.setStyleSheet("""
             QPushButton {
-                background-color: #3498DB;
-                color: white;
-                border: none;
-                border-radius: 5px;
+                background-color: #A8D3EF;
+                color: black;
+                border: 1px solid #888888;
+                border-radius: 6px;
                 font-weight: bold;
+                font-size: 16px;
+                padding: 8px 16px;
             }
-            QPushButton:hover { background-color: #2980B9; }
+            QPushButton:hover {
+                background-color: #90CBE8;
+            }
         """)
+
         export_btn.clicked.connect(self.export_csv)
         top_bar_layout.addWidget(export_btn)
         
         # Save button
         save_btn = QPushButton("Save Settings")
-        save_btn.setFixedSize(120, 30)
+        save_btn.setFixedSize(140, 40)
         save_btn.setStyleSheet("""
             QPushButton {
-                background-color: #2ECC71;
-                color: white;
-                border: none;
-                border-radius: 5px;
+                background-color: #A8D3EF;
+                color: black;
+                border: 1px solid #888888;
+                border-radius: 6px;
                 font-weight: bold;
+                font-size: 16px;
+                padding: 8px 16px;
             }
-            QPushButton:hover { background-color: #27AE60; }
+            QPushButton:hover {
+                background-color: #90CBE8;
+            }
         """)
+
         save_btn.clicked.connect(self.save_settings)
         top_bar_layout.addWidget(save_btn)
         

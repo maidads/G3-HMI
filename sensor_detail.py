@@ -34,12 +34,13 @@ class SensorDetail(QWidget):
         # Back button
         top_bar_layout = QHBoxLayout()
         back_btn = QPushButton("← Back")
-        back_btn.setFixedSize(80, 30)
+        back_btn.setFixedSize(100, 40)
         back_btn.setStyleSheet("""
             QPushButton {
                 background-color: #A8D3EF; color: black;
                 border: 1px solid #ccc; border-radius: 5px;
                 font-weight: bold;
+                font-size: 16px;
             }
             QPushButton:hover { background-color: #f0f0f0; }
         """)
