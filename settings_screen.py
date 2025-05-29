@@ -245,6 +245,8 @@ class SettingsScreen(QWidget):
         # Sensor selection
         sensor_layout = QHBoxLayout()
         config_label = QLabel("Configure Sensor:")
+        config_label.setFont(QFont("Arial",20))
+
         self.sensor_combo = QComboBox()
         self.sensor_combo.setFixedWidth(150)
         self.sensor_combo.addItems(list(self.settings["sensors"].keys()))
@@ -256,11 +258,13 @@ class SettingsScreen(QWidget):
 
         # Sensor parameters section
         params_title = QLabel("Sensor Parameters")
-        params_title.setFont(QFont("Arial", 11, QFont.Bold))
+        params_title.setFont(QFont("Arial", 22, QFont.Bold))
         layout.addWidget(params_title)
 
         # Enable checkbox
         self.sensor_enabled = QCheckBox("Enable this sensor")
+        self.sensor_enabled.setFont(QFont("Arial",20))
+
         layout.addWidget(self.sensor_enabled)
 
         # Form for sensor settings
@@ -272,6 +276,8 @@ class SettingsScreen(QWidget):
 
         # Max level
         max_level_label = QLabel("Max Physical Level:")
+        max_level_label.setFont(QFont("Arial",20))
+
         self.max_level_spin = QSpinBox()
         self.max_level_spin.setRange(10, 1000)
         self.max_level_spin.setSuffix(" cm")
@@ -280,6 +286,8 @@ class SettingsScreen(QWidget):
 
         # Offset
         offset_label = QLabel("Reading Offset:")
+        offset_label.setFont(QFont("Arial",20))
+
         self.offset_spin = QSpinBox()
         self.offset_spin.setRange(-100, 100)
         self.offset_spin.setSuffix(" cm")
@@ -290,10 +298,11 @@ class SettingsScreen(QWidget):
         
         # Calibration button
         calibrate_btn = QPushButton("Calibrate Sensor")
-        calibrate_btn.setFixedWidth(120)
+        calibrate_btn.setFont(QFont("Arial",20))
+        calibrate_btn.setFixedWidth(180)
         calibrate_btn.setStyleSheet("""
             QPushButton {
-                background-color: white;
+                background-color: #A8D3EF;
                 color: black;
                 border: 1px solid #cccccc;
                 border-radius: 5px;
