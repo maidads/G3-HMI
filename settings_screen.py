@@ -153,7 +153,7 @@ class SettingsScreen(QWidget):
 
         # Section title
         section_title = QLabel("Alarm Thresholds (%)")
-        section_title.setFont(QFont("Arial", 20, QFont.Bold))
+        section_title.setFont(QFont("Arial", 22, QFont.Bold))
         layout.addWidget(section_title)
 
         # Form for thresholds
@@ -201,7 +201,7 @@ class SettingsScreen(QWidget):
 
         # Update settings section
         update_title = QLabel("Update Settings")
-        update_title.setFont(QFont("Arial", 11, QFont.Bold))
+        update_title.setFont(QFont("Arial", 22, QFont.Bold))
         layout.addWidget(update_title)
 
         update_form = QFormLayout()
@@ -211,6 +211,8 @@ class SettingsScreen(QWidget):
         update_form.setHorizontalSpacing(20)
 
         interval_label = QLabel("Data Update Interval:")
+        interval_label.setFont(QFont("Arial",20))
+
         self.update_spin = QSpinBox()
         self.update_spin.setRange(1, 120)
         self.update_spin.setSuffix(" min")
@@ -221,10 +223,12 @@ class SettingsScreen(QWidget):
         
         # Display settings section
         display_title = QLabel("Display Settings")
-        display_title.setFont(QFont("Arial", 11, QFont.Bold))
+        display_title.setFont(QFont("Arial", 22, QFont.Bold))
         layout.addWidget(display_title)
         
         self.fullscreen_check = QCheckBox("Start in fullscreen mode")
+        self.fullscreen_check.setFont(QFont("Arial",20))
+
         layout.addWidget(self.fullscreen_check)
         
         layout.addStretch()
